@@ -28,8 +28,14 @@ def load_data(nrows):
     
     return data
 
+# loading data
 data = load_data(100000)
 
+# displaying data in a map
+st.header('Where are the most people injured in NYC')
+injured_people = st.slider('Number of persons injured',0,19)
+st.map(data.query('injured_persons >= @injured_people')[['latitude', 'longitude']].dropna(how='any') )
+ 
 # checkbox to show data
 if st.checkbox("Show Raw data"):
     
