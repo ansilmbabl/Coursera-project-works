@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import pydeck as pdk
+
 
 # url (location in case working locally)
 DATA_URL = (
@@ -39,6 +41,22 @@ st.map(data.query('injured_persons >= @injured_people')[['latitude', 'longitude'
 st.header("How many collisions occur during a give time of the day")
 hour = st.slider('Hour to look at', 0, 23)
 data = data[data['date/time'].dt.hour == hour]
+
+# 3D plot
+st.markdown(f'vehicle collision between {hour}:00 and {hour + 1}:00')
+# creating map
+midpoint = (np.average(data['latitude']), np.average(data['longitude']))
+st.write(pdk.Deck(
+    map_style= "mapbox://styles/mapbox/light-v9",
+    initial_view_state={
+        "latitude":midpoint[0],
+        "longitude":midpoint[1],
+        "zoom":11,
+        "pitch":50,
+    },
+))
+
+
 # checkbox to show data
 if st.checkbox("Show Raw data"):
     
