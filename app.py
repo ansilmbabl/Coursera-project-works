@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pydeck as pdk
+import plotly.express as px
 
 
 # url (location in case working locally)
@@ -68,6 +69,15 @@ st.write(pdk.Deck(
     ],
 ))
 
+# chart and histograms
+st.subheader(f"Breakdown by minute between {hour}:00 and {hour + 1}:00")
+filtered = data[
+    (data['date/time'].dt.hour >= hour) & (data['date/time'].dt.hour < (hour+1))
+    ]
+hist,bin_edge = np.histogram(filtered['date/time'].dt.minute, bins=60, range=(0,60))
+chart_data = pd.DataFrame({"minute":range(60),"crashes":hist})
+fig = px.bar(chart_data, x="minute", y="crashes", hover_data=['minute','crashes'], height=400)
+st.write(fig)
 
 # checkbox to show data
 if st.checkbox("Show Raw data"):
