@@ -10,11 +10,12 @@ DATA_URL = (
     "Motor_Vehicle_Collisions_-_Crashes.csv"
 )
 
+
 # Main heading
 st.title('Motor_Vehicle_Collisions in New York City')
-
 # subheading
 st.markdown('This application is a Streamlit dashboard that can be used to anlyse motor vehicle collisions in NYC 🗽💥🚘')
+
 
 # function to load the data
 @st.cache_data(persist=True) # to cache the loaded data, so that we don't need to do this computation everytime we run the app or code or input is changed
@@ -33,6 +34,8 @@ def load_data(nrows):
 
 # loading data
 data = load_data(100000)
+original_data = data
+
 
 # displaying data in a map
 st.header('Where are the most people injured in NYC')
@@ -42,6 +45,7 @@ st.map(data.query('injured_persons >= @injured_people')[['latitude', 'longitude'
 st.header("How many collisions occur during a give time of the day")
 hour = st.slider('Hour to look at', 0, 23)
 data = data[data['date/time'].dt.hour == hour]
+
 
 # 3D plot
 st.markdown(f'vehicle collision between {hour}:00 and {hour + 1}:00')
@@ -69,6 +73,7 @@ st.write(pdk.Deck(
     ],
 ))
 
+
 # chart and histograms
 st.subheader(f"Breakdown by minute between {hour}:00 and {hour + 1}:00")
 filtered = data[
@@ -78,6 +83,19 @@ hist,bin_edge = np.histogram(filtered['date/time'].dt.minute, bins=60, range=(0,
 chart_data = pd.DataFrame({"minute":range(60),"crashes":hist})
 fig = px.bar(chart_data, x="minute", y="crashes", hover_data=['minute','crashes'], height=400)
 st.write(fig)
+
+
+# dropdown
+st.header('Top 5 dangerous streets by affected type')
+select = st.selectbox('Affected type of people', options=['Pedestrians','Cyclists','Motorists'])
+
+if select == "Pedestrians":
+    st.write(original_data.query("injured_pedestrians >=1 ")[["on_street_name", "injured_pedestrians"]].sort_values(by="injured_pedestrians",ascending=False).dropna(how="any").head())
+elif select == "Cyclists":
+    st.write(original_data.query("injured_cyclists >=1 ")[["on_street_name", "injured_cyclists"]].sort_values(by="injured_cyclists",ascending=False).dropna(how="any").head())
+else:
+    st.write(original_data.query("injured_motorists >=1 ")[["on_street_name", "injured_motorists"]].sort_values(by="injured_motorists",ascending=False).dropna(how="any").head())
+
 
 # checkbox to show data
 if st.checkbox("Show Raw data"):
